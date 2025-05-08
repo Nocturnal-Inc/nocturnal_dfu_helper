@@ -8,6 +8,13 @@ import 'package:nocturnal_dfu/src/models/manifest.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:uuid/uuid.dart';
 
+class UpgradeStatus {
+  late mcumgr.FirmwareUpgradeState state;
+  late String message;
+
+  UpgradeStatus(this.state, this.message);
+}
+
 /// Checks if you are awesome. Spoiler: you are.
 class NocturnalDFU {
   late String deviceId;
@@ -16,7 +23,7 @@ class NocturnalDFU {
   NocturnalDFU({required this.deviceId, required this.fileContents});
 
   /// deviceId = UUID of the nrf5* ble device
-  void update() async {
+  void update(void Function(UpgradeStatus) cb) async {
     try {
       final managerFactory = mcumgr.FirmwareUpdateManagerFactory();
 
@@ -28,25 +35,34 @@ class NocturnalDFU {
 
       updateManager.update(firmwareImages);
 
+      var upgradeState = mcumgr.FirmwareUpgradeState.none;
+
       updateManager.updateStateStream?.listen((event) {
-        if (event == mcumgr.FirmwareUpgradeState.success) {
-          print("Update Success");
-        } else {
-          print(event);
-        }
+        upgradeState = event;
       });
 
       updateManager.progressStream.listen((event) {
-        print("${event.bytesSent} / ${event.imageSize}} bytes sent");
+        cb(
+          UpgradeStatus(
+            upgradeState,
+            "${event.bytesSent} / ${event.imageSize}} bytes sent",
+          ),
+        );
       });
 
       updateManager.logger.logMessageStream
           .where((log) => log.level.rawValue > 1) // filter out debug messages
           .listen((log) {
-            print(log.message);
+            cb(UpgradeStatus(upgradeState, log.message));
           });
     } catch (e) {
       print(e);
+      cb(
+        UpgradeStatus(
+          mcumgr.FirmwareUpgradeState.none,
+          "failed to update. Error: $e",
+        ),
+      );
     }
   }
 
