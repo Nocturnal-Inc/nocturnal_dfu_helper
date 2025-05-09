@@ -19,6 +19,7 @@ class UpgradeStatus {
 class NocturnalDFU {
   late String deviceId;
   late Uint8List fileContents;
+  mcumgr.FirmwareUpdateManager? updateManager;
 
   NocturnalDFU({required this.deviceId, required this.fileContents});
 
@@ -27,21 +28,21 @@ class NocturnalDFU {
     try {
       final managerFactory = mcumgr.FirmwareUpdateManagerFactory();
 
-      final updateManager = await managerFactory.getUpdateManager(deviceId);
+      updateManager = await managerFactory.getUpdateManager(deviceId);
 
-      updateManager.setup();
+      updateManager!.setup();
 
       var firmwareImages = await getFiles(fileContents);
 
-      updateManager.update(firmwareImages);
+      updateManager!.update(firmwareImages);
 
       var upgradeState = mcumgr.FirmwareUpgradeState.none;
 
-      updateManager.updateStateStream?.listen((event) {
+      updateManager!.updateStateStream?.listen((event) {
         upgradeState = event;
       });
 
-      updateManager.progressStream.listen((event) {
+      updateManager!.progressStream.listen((event) {
         cb(
           UpgradeStatus(
             upgradeState,
@@ -50,7 +51,7 @@ class NocturnalDFU {
         );
       });
 
-      updateManager.logger.logMessageStream
+      updateManager!.logger.logMessageStream
           .where((log) => log.level.rawValue > 1) // filter out debug messages
           .listen((log) {
             cb(UpgradeStatus(upgradeState, log.message));
@@ -113,5 +114,11 @@ class NocturnalDFU {
     await tempDir.delete(recursive: true);
 
     return firmwareImages;
+  }
+
+  void dispose() {
+    if (updateManager != null) {
+      updateManager!.kill();
+    }
   }
 }
