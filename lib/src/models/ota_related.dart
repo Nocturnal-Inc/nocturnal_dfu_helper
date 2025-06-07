@@ -87,3 +87,10 @@ class OtaRelated {
     return (crc.toRadixString(16).padLeft(8, '0'), crc);
   }
 }
+
+class ReceivedData {
+  String checksum;
+  int index;
+
+  ReceivedData(this.checksum, this.index);
+}
