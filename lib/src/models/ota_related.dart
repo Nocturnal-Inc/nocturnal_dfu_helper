@@ -13,6 +13,10 @@ class OtaRelated {
 
   OtaRelated(this._fileContent);
 
+  int getTotalChunks() {
+    return (_fileContent.lengthInBytes / chunkSize).ceil();
+  }
+
   (ByteData?, ChunkStatus) getCurrentChunk() {
     if (_fileContent.lengthInBytes == 0 ||
         _index * chunkSize >= _fileContent.lengthInBytes) {
@@ -36,8 +40,6 @@ class OtaRelated {
       _index -= 1;
       return (null, ChunkStatus.error);
     }
-
-    print("Checksum: String: $checksum | Int: $crcValue");
 
     // Create new Uint8List with 2 bytes for index, 2 bytes for chunk length, plus the actual chunk
     final resultBytes = Uint8List(8 + size);
