@@ -28,7 +28,8 @@ class NocturnalDFU {
     try {
       final managerFactory = mcumgr.FirmwareUpdateManagerFactory();
 
-      updateManager = await managerFactory.getUpdateManager(deviceId);
+      updateManager =
+          updateManager ?? await managerFactory.getUpdateManager(deviceId);
 
       updateManager!.setup();
 
