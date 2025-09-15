@@ -89,8 +89,16 @@ class OtaRelated {
 }
 
 class ReceivedData {
-  String checksum;
-  int index;
+  final String checksumReceived;
+  final int index;
 
-  ReceivedData(this.checksum, this.index);
+  ReceivedData(this.checksumReceived, this.index);
+
+  Map<String, dynamic> toMap() {
+    return {'checksumReceived': checksumReceived, 'index': index};
+  }
+
+  static ReceivedData fromMap(Map<String, dynamic> map) {
+    return ReceivedData(map['checksumReceived'] as String, map['index'] as int);
+  }
 }
