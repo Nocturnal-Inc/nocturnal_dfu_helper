@@ -2,6 +2,7 @@ class OTAManifest {
   final String left;
   final String right;
   final String main;
+  final String audio;
   final String timestamp;
   final String version;
 
@@ -9,6 +10,7 @@ class OTAManifest {
     required this.left,
     required this.right,
     required this.main,
+    required this.audio,
     required this.timestamp,
     required this.version,
   });
@@ -18,6 +20,7 @@ class OTAManifest {
       left: json['left'],
       right: json['right'],
       main: json['main'],
+      audio: json['audio'] ?? '',
       timestamp: json['timestamp'],
       version: json['version'],
     );
@@ -25,6 +28,6 @@ class OTAManifest {
 
   @override
   String toString() {
-    return 'OTAManifest(left: $left, right: $right, main: $main, timestamp: $timestamp, version: $version)';
+    return 'OTAManifest(left: $left, right: $right, main: $main, audio: $audio, timestamp: $timestamp, version: $version)';
   }
 }
