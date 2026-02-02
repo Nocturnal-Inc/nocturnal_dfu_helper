@@ -47,7 +47,7 @@ class NocturnalDFU {
         cb(
           UpgradeStatus(
             upgradeState,
-            "${event.bytesSent} / ${event.imageSize}} bytes sent",
+            "${event.bytesSent} / ${event.imageSize} bytes sent",
           ),
         );
       });
