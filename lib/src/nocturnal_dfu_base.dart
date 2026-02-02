@@ -24,7 +24,7 @@ class NocturnalDFU {
   NocturnalDFU({required this.deviceId, required this.fileContents});
 
   /// deviceId = UUID of the nrf5* ble device
-  void update(void Function(UpgradeStatus) cb) async {
+  Future<void> update(void Function(UpgradeStatus) cb) async {
     try {
       final managerFactory = mcumgr.FirmwareUpdateManagerFactory();
 
