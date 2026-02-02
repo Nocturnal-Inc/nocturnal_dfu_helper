@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -25,6 +26,7 @@ class NocturnalDFU {
 
   /// deviceId = UUID of the nrf5* ble device
   Future<void> update(void Function(UpgradeStatus) cb) async {
+    final completer = Completer<void>();
     try {
       final managerFactory = mcumgr.FirmwareUpdateManagerFactory();
 
@@ -39,9 +41,21 @@ class NocturnalDFU {
 
       var upgradeState = mcumgr.FirmwareUpgradeState.none;
 
-      updateManager!.updateStateStream?.listen((event) {
-        upgradeState = event;
-      });
+      updateManager!.updateStateStream?.listen(
+        (event) {
+          upgradeState = event;
+        },
+        onError: (error) {
+          if (!completer.isCompleted) {
+            completer.completeError(error);
+          }
+        },
+        onDone: () {
+          if (!completer.isCompleted) {
+            completer.complete();
+          }
+        },
+      );
 
       updateManager!.progressStream.listen((event) {
         cb(
@@ -57,6 +71,8 @@ class NocturnalDFU {
           .listen((log) {
             cb(UpgradeStatus(upgradeState, log.message));
           });
+
+      await completer.future;
     } catch (e) {
       print(e);
       cb(
